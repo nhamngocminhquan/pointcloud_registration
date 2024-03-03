@@ -206,9 +206,13 @@ void PointCloudRegistration::publishPointCloud(pcl::PointCloud<pcl::PointXYZ> &p
 
 pcl::PointCloud<pcl::PointXYZ> PointCloudRegistration::convertFromMsgToPointCloud(const sensor_msgs::PointCloud2& pointcloud_msg)
 {
-  pcl::PointCloud<pcl::PointXYZ> pointcloud_pcl_normals;
+  pcl::PointCloud<pcl::PointXYZ> pointcloud_pcl_normals, pointcloud_pcl_normals_filtered;
   pcl::fromROSMsg(pointcloud_msg, pointcloud_pcl_normals);
-  return (pointcloud_pcl_normals);
+
+  // Remove NaNs in point cloud courtesy of: https://answers.ros.org/question/207245/lots-of-nan-data-when-convert-pointcloud2-to-pclpointxyz/
+  std::vector<int> indices;
+  pcl::removeNaNFromPointCloud(pointcloud_pcl_normals, pointcloud_pcl_normals_filtered, indices);
+  return (pointcloud_pcl_normals_filtered);
   //TODO: make this work again with Hokuyo scans
   // //incrementing the scan index
   // scan_index_++;
