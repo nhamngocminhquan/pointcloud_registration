@@ -38,7 +38,7 @@ template <typename PointSource, typename PointTarget> inline void
 {
   if (cloud->points.empty ())
   {
-    ROS_ERROR ("[pcl::%s::setInputTarget] Invalid or empty point cloud dataset given!", getClassName ().c_str ());
+    ROS_WARN ("[pcl::%s::setInputTarget] Invalid or empty point cloud dataset given!", getClassName ().c_str ());
     return;
   }
   target_ = cloud;

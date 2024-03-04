@@ -184,7 +184,7 @@ namespace pcl
 
           if(source_corresp.points.size() == 0)
           {
-            ROS_ERROR("[IterativeClosestPointCorrespondencesCheck:] No correspondences found. Try to relax the conditions.", getClassName().c_str());
+            ROS_WARN("[IterativeClosestPointCorrespondencesCheck:] No correspondences found. Try to relax the conditions.", getClassName().c_str());
             return;
           }
           //ROS_INFO("Correspondences: %d", count);

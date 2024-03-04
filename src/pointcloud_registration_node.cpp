@@ -370,12 +370,17 @@ void PointCloudRegistration::pointcloudRegistrationCallBack(const sensor_msgs::P
   if( firstCloudReceived_ == false)
   {
     pointcloud2_current_ = convertFromMsgToPointCloud(pointcloud_msg);
-    ROS_INFO("[PointCloudRegistration:] Size of point cloud received = %d", (int) pointcloud2_current_.points.size());
-    firstCloudReceived_ = true;
-    ROS_INFO("[PointCloudRegistration:] Received first point cloud with points %ld:", pointcloud2_current_.points.size());
-    kdtree_.setInputCloud(boost::make_shared< pcl::PointCloud < pcl::PointXYZ> > (pointcloud2_current_));
 
-    pointcloud2_merged_ = pointcloud2_current_;
+    // Check if point cloud is empty before adding to kdtree
+    // https://github.com/Livox-SDK/LIO-Livox/issues/49#issuecomment-1484803074
+    if (!pointcloud2_current_.empty()) {
+      ROS_INFO("[PointCloudRegistration:] Size of point cloud received = %d", (int) pointcloud2_current_.points.size());
+      firstCloudReceived_ = true;
+      ROS_INFO("[PointCloudRegistration:] Received first point cloud with points %ld:", pointcloud2_current_.points.size());
+      kdtree_.setInputCloud(boost::make_shared< pcl::PointCloud < pcl::PointXYZ> > (pointcloud2_current_));
+
+      pointcloud2_merged_ = pointcloud2_current_;
+    }
   }
   else if( secondCloudReceived_ == false)
   {
@@ -392,14 +397,16 @@ void PointCloudRegistration::pointcloudRegistrationCallBack(const sensor_msgs::P
   else
   {
     pointcloud2_current_ = convertFromMsgToPointCloud(pointcloud_msg);
-    ROS_INFO("[PointCloudRegistration:] Received point cloud number: %d with points %ld.", counter_, pointcloud2_current_.points.size());
-    kdtree_.setInputCloud(boost::make_shared< pcl::PointCloud < pcl::PointXYZ> > (pointcloud2_merged_));
+    if (!pointcloud2_current_.empty()) {
+      ROS_INFO("[PointCloudRegistration:] Received point cloud number: %d with points %ld.", counter_, pointcloud2_current_.points.size());
+      kdtree_.setInputCloud(boost::make_shared< pcl::PointCloud < pcl::PointXYZ> > (pointcloud2_merged_));
 
-    //Now we get the transformation from the overlapped regions of the 2 point clouds
-    final_transformation_= getOverlapTransformation();
-    pcl::transformPointCloud(pointcloud2_current_, pointcloud2_transformed_, final_transformation_);
+      //Now we get the transformation from the overlapped regions of the 2 point clouds
+      final_transformation_= getOverlapTransformation();
+      pcl::transformPointCloud(pointcloud2_current_, pointcloud2_transformed_, final_transformation_);
 
-    pointcloud2_merged_ += pointcloud2_transformed_;
+      pointcloud2_merged_ += pointcloud2_transformed_;
+    }
   }
 
   publishPointCloud(pointcloud2_merged_);
